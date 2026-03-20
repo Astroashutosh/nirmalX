@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
 
-import { getLiquidityContract } from "../utils/contract";
+import { getLiquidityContract,getNRXContract } from "../utils/contract";
 
 function LiquidityRequest() {
 
@@ -67,26 +67,61 @@ const formatted = stakes.map((s, i) => ({
 
   /* ================= APPROVE ================= */
 
-  const handleApprove = async (user, index) => {
-    try {
+  // const handleApprove = async (user, index) => {
+  //   try {
 
-      const liquidity = await getLiquidityContract(liquidityAddress);
+  //     const liquidity = await getLiquidityContract(liquidityAddress);
+  //         const nrx = await getNRXContract(contracts.TOKEN_CONTRACT);
 
-      const confirmBox = window.confirm("Approve this stake?");
-      if (!confirmBox) return;
+  //     const confirmBox = window.confirm("Approve this stake?");
+  //     if (!confirmBox) return;
 
-      const tx = await liquidity.approveStake(user, index);
-      await tx.wait();
+  //     await (await nrx.approve(
+  // contracts.LIQUIDITY_CONTRACT,
+  // amount
+  // )).wait();
 
-      toast.success("Stake Approved");
+  //     const tx = await liquidity.approveStake(user, index);
+  //     await tx.wait();
 
-      loadData();
+  //     toast.success("Stake Approved");
 
-    } catch (err) {
-      console.log(err);
-      toast.error("Approve failed (Only owner allowed)");
-    }
-  };
+  //     loadData();
+
+  //   } catch (err) {
+  //     console.log(err);
+  //     toast.error("Approve failed (Only owner allowed)");
+  //   }
+  // };
+
+
+const handleApprove = async (user, index) => {
+  try {
+
+    const liquidity = await getLiquidityContract(contracts.LIQUIDITY_CONTRACT);
+    const nrx = await getNRXContract(contracts.TOKEN_CONTRACT);
+
+    const confirmBox = window.confirm("Approve this stake?");
+    if (!confirmBox) return;
+
+    await (await nrx.approve(
+      contracts.LIQUIDITY_CONTRACT,
+      ethers.MaxUint256
+    )).wait();
+
+    const tx = await liquidity.approveStake(user, index);
+    await tx.wait();
+
+    toast.success("Stake Approved");
+
+    loadData();
+
+  } catch (err) {
+    console.log(err);
+    toast.error("Approve failed (Only owner allowed)");
+  }
+};
+
 
   return (
     <>
