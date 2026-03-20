@@ -34,25 +34,25 @@ function LiquidityRequest() {
         // console.log("stakes:",stakes);
         // console.log("users",users);
 
-      // const formatted = stakes.map((s, i) => ({
-      //   id: s.id.toString(),
-      //   amount: Number(ethers.formatUnits(s.amount, 18)),
-      //   timestamp: s.timestamp,
-      //   user: users[i],
-      //   index: i  
-      // }));
+      const formatted = stakes.map((s, i) => ({
+        id: s.id.toString(),
+        amount: Number(ethers.formatUnits(s.amount, 18)),
+        timestamp: s.timestamp,
+        user: users[i],
+        index: i  
+      }));
 
-      const allStakes = await Promise.all(
-  stakes.map((_, i) => liquidity.allStakes(i))
-);
+//       const allStakes = await Promise.all(
+//   stakes.map((_, i) => liquidity.allStakes(i))
+// );
 
-const formatted = stakes.map((s, i) => ({
-  id: s.id.toString(),
-  amount: Number(ethers.formatUnits(s.amount, 18)),
-  timestamp: Number(s.timestamp),
-  user: allStakes[i].user,
-  index: Number(allStakes[i].index)   // ✅ correct index
-}));
+// const formatted = stakes.map((s, i) => ({
+//   id: s.id.toString(),
+//   amount: Number(ethers.formatUnits(s.amount, 18)),
+//   timestamp: Number(s.timestamp),
+//   user: allStakes[i].user,
+//   index: Number(allStakes[i].index)   // ✅ correct index
+// }));
         console.log("formatted data",formatted);
 
       setData(formatted);
@@ -172,8 +172,9 @@ const handleApprove = async (user, index) => {
                       className="btn btn-success btn-sm"
                       onClick={() => handleApprove(row.user, row.index)}
                     >
-                      Approve
+                      Approve {row.index}
                     </button>
+                    
                   </td>
 
                 </tr>
