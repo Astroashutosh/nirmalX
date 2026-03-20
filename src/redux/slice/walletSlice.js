@@ -57,6 +57,7 @@
 
 
 import { createSlice } from "@reduxjs/toolkit";
+import Liquidity from "../../user/Liquidity";
 
 const initialState = {
   address: null,
@@ -71,6 +72,8 @@ const initialState = {
     USDT_CONTRACT: "0x55d398326f99059ff775485246999027b3197955",
     LOCK_CONTRACT: "0xa6aF428140c2C6397f1A8589C1778BE599d31CB6",
     ROUTER: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
+    LIQUIDITY_CONTRACT: "0x44a0c3399c9F5D6c4f2C8D005DfB997C61955e42",
+
   },
 
   network: {
@@ -91,19 +94,19 @@ const walletSlice = createSlice({
     //   state.isConnected = true;
     // },
 
-setWallet(state, action) {
+    setWallet(state, action) {
 
- state.address = action.payload.address ?? state.address;
- state.chainId = action.payload.chainId ?? state.chainId;
- state.userId = action.payload.userId ?? state.userId;
- state.userData = action.payload.userData ?? state.userData;
+      state.address = action.payload.address ?? state.address;
+      state.chainId = action.payload.chainId ?? state.chainId;
+      state.userId = action.payload.userId ?? state.userId;
+      state.userData = action.payload.userData ?? state.userData;
 
-/* IMPORTANT */
+      /* IMPORTANT */
 
- state.isConnected =
- action.payload.chainId ? true : false;
+      state.isConnected =
+        action.payload.chainId ? true : false;
 
-},
+    },
 
 
     disconnectWallet(state) {

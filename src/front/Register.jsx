@@ -321,17 +321,17 @@
 //         );
 //       }
 
-//       /* ===== CONFIRMATION ===== */
+    //   /* ===== CONFIRMATION ===== */
 
-//       const confirmText =
-//         `You are registering with Sponsor ID ${refId}\n\n` +
-//         `Sponsor Address: ${referAddress}\n\n` +
-//         `Press OK to continue`;
+    //   const confirmText =
+    //     `You are registering with Sponsor ID ${refId}\n\n` +
+    //     `Sponsor Address: ${referAddress}\n\n` +
+    //     `Press OK to continue`;
 
-//       if (!window.confirm(confirmText)) {
-//         setLoading(false);
-//         return;
-//       }
+    //   if (!window.confirm(confirmText)) {
+    //     setLoading(false);
+    //     return;
+    //   }
 
 //       /* ===== GAS ESTIMATION (SAFE) ===== */
 
@@ -639,6 +639,17 @@ const navigate = useNavigate();
 
  }
 
+      /* ===== CONFIRMATION ===== */
+
+    //   const confirmText =
+    //     `You are registering with Sponsor ID ${refId}\n\n` +
+    //     `Sponsor Address: ${referAddress}\n\n` +
+    //     `Press OK to continue`;
+
+    //   if (!window.confirm(confirmText)) {
+    //     setLoading(false);
+    //     return;
+    //   }
 
  /* STATIC TEST (IMPORTANT) */
 

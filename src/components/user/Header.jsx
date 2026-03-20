@@ -3,9 +3,9 @@
 
 // function Header() {
 //   return (
- 
+
 //     <>
-      
+
 //     <div className="header-middle">
 //         <div className="container">
 //             <div className="row">
@@ -22,11 +22,11 @@
 //                                         </span>
 //                                     </div>
 //                                 </div>
-                                
+
 //                             </div>
 //                           <div className="col-xl-12 col-md-12 col-sm-6">
 //     <div className="row d-flex flex-wrap justify-content-center">
-        
+
 //         <div className="col-xl-auto col-md-6 col-sm-12 mb-2">
 //             <span className="connect_btn d-inline-block" id="status">
 //                 Account Status: <span style={{ color: "red" }}>Inactive</span>
@@ -62,18 +62,18 @@
 
 
 //                         </div>
-                        
+
 //                      <br/>
 //                      <br/>
-                        
-                      
+
+
 //                     </div>
 //                 </div>
 //             </div>
 //         </div>
 //     </div>
 
-    
+
 //     </>
 
 //   )
@@ -101,17 +101,17 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { ethers } from "ethers";
-import { getMainContract } from "../../utils/contract";
+import { getMainContract,getLiquidityContract } from "../../utils/contract";
 import { disconnectWallet } from "../../redux/slice/walletSlice";
 import { persistor } from "../../redux/store";
 function Header() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const [isOwner, setIsOwner] = useState(false);
   const { address, contracts } = useSelector(
     (state) => state.wallet
   );
-
+// const address="0xc56eCBBf7A3C63cF659c87355fD548e9b78b30c0";
   const [shortAddress, setShortAddress] =
     useState("Loading..");
   const [isActive, setIsActive] =
@@ -125,9 +125,11 @@ function Header() {
         )}`
       );
       checkStatus();
+      checkOwner();
     } else {
       setShortAddress("Not Connected");
       setIsActive(false);
+      setIsOwner(false);
     }
   }, [address]);
 
@@ -166,15 +168,38 @@ function Header() {
     }
   };
 
-const handleLogout = async () => {
-  dispatch(disconnectWallet());
+  const handleLogout = async () => {
+    dispatch(disconnectWallet());
 
-  await persistor.purge();
+    await persistor.purge();
 
-  localStorage.removeItem("userId");
+    localStorage.removeItem("userId");
 
-  navigate("/login");
-};
+    navigate("/login");
+  };
+
+  const checkOwner = async () => {
+    try {
+      if (!contracts?.LIQUIDITY_CONTRACT) return;
+
+      const liquidity = await getLiquidityContract(
+        contracts.LIQUIDITY_CONTRACT
+      );
+
+      const owner = await liquidity.owner();
+      // const owner ="0xc56eCBBf7A3C63cF659c87355fD548e9b78b30c0";
+
+      // console.log("owner is :", owner);
+      setIsOwner(
+        owner.toLowerCase() === address.toLowerCase()
+      );
+
+    } catch (err) {
+      console.log(err);
+      setIsOwner(false);
+    }
+  };
+
   return (
     <>
       <div className="header-middle">
@@ -258,6 +283,28 @@ const handleLogout = async () => {
                           <i className="fas fa-list"></i>
                         </Link>
                       </div>
+
+                      <div className="col-xl-auto col-md-6 col-sm-12 mb-2">
+                        <Link
+                          to="/liquidity"
+                          className="connect_btn d-inline-block"
+                        >
+                          Liquidity{" "}
+                          <i className="fas fa-list"></i>
+                        </Link>
+                      </div>
+
+                      {isOwner && (
+                        <div className="col-xl-auto col-md-6 col-sm-12 mb-2">
+                          <Link
+                            to="/liquidityRequest"
+                            className="connect_btn d-inline-block"
+                          >
+                            Liquidity Request
+                            <i className="fas fa-list"></i>
+                          </Link>
+                        </div>
+                      )}
 
                       <div className="col-xl-auto col-md-6 col-sm-12 mb-2">
                         <button

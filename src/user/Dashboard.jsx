@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -13,7 +14,7 @@ function Dashboard() {
   // const { userId: paramUserId } = useParams();
   const { contracts, userId: reduxUserId, address } =
     useSelector((state) => state.wallet);
-
+const navigate = useNavigate();
   // const userId = paramUserId || reduxUserId;
 
   /* ================= STATE ================= */
@@ -36,6 +37,7 @@ function Dashboard() {
   const [partnerCount, setPartnerCount] = useState("0");
   const [teamCount, setTeamCount] = useState("0");
   const [myId, setMyId] = useState("");
+  const [refAddress, setRefAddress] = useState("");
 
   const [directBusiness, setDirectBusiness] = useState({ usd: "0.00", nrx: "0.00" });
   const [teamBusiness, setTeamBusiness] = useState({ usd: "0.00", nrx: "0.00" });
@@ -49,6 +51,12 @@ function Dashboard() {
   const [leaderRewardLeft, setLeaderRewardLeft] = useState("");
 
   const [status, setStatus] = useState("Inactive");
+
+
+  const [withdrawCheck, setWithdrawCheck] = useState({
+    success: false,
+    amount: 0
+  });
 
   /* ================= HELPERS ================= */
 
@@ -92,7 +100,9 @@ function Dashboard() {
 
 
   useEffect(() => {
-    if (address) loadDashboard();
+    if (address)
+      loadDashboard();
+    checkWithdrawStake();
   }, [address]);
 
 
@@ -134,11 +144,11 @@ function Dashboard() {
         main.user_details(address),
         main.getTokenToUSDT(one),
         token.balanceOf(contracts.LOCK_CONTRACT),
-        main._amountWithdrawn(address), // 🔥 ADD THIS
+        main._amountWithdrawn(address), 
         main.registrationTime(address)
       ]);
 
-
+console.log("User Data Is:",user);
 
       if (!exists) {
         toast.error("Invalid User");
@@ -256,7 +266,8 @@ function Dashboard() {
       setPartnerCount(user.partnercount.toString());
       setTeamCount(details.myTeamCount.toString());
       setMyId(user.referralCode);
-
+      setRefAddress(user.referrer);
+// console.log("referrer address is ",user.referrer);
       setStatus(totalStaked >= 125 ? "Active" : "Inactive");
 
       setLockedNRX(
@@ -271,7 +282,118 @@ function Dashboard() {
 
 
 
-  const referralLink = `https://nirmalx.io/signup.php?ref=${myId}`;
+  const referralLink = `https://nirmalx.io/register?ref=${myId}`;
+
+
+
+// const checkWithdrawStake = async () => {
+//   try {
+
+//     const main = await getMainContract(contracts.MAIN_CONTRACT);
+//     const userDetail = await main.users(address);
+
+//     const userId = userDetail.id.toString();
+
+//     const formData = new FormData();
+//     formData.append("action", "check_withdraw_stake");
+//     formData.append("userid", userId);
+
+//     const res = await fetch(
+//       "https://nirmalx.io/old/user/user_action.php",
+//       {
+//         method: "POST",
+//         body: formData
+//       }
+//     );
+
+//     const data = await res.json();
+// // console.log("data is :",data);
+//     if (data) {
+
+//       setWithdrawCheck({
+//         success: data.success,
+//         amount: data.amount
+//       });
+
+//       if (data.success === false) {
+//         //  alert(data.amount);
+//         const halfAmount = data.amount / 2;
+//          const referralAddress=refAddress;
+//        console.log("referral address is:",referralAddress);
+//         toast.info("Please stake first to continue");
+// console.log(data)
+//         navigate("/staking", {
+//           state: {
+//             amount: halfAmount,
+//             wd_id: data.wd_id,
+//              referrarAddress:referralAddress,
+//           }
+//         });
+
+//       }
+
+//     }
+
+//   } catch (error) {
+//     console.error("Withdraw check error:", error);
+//   }
+// };
+
+
+
+const checkWithdrawStake = async () => {
+  try {
+
+    const main = await getMainContract(contracts.MAIN_CONTRACT);
+    const userDetail = await main.users(address);
+
+    const userId = userDetail.id.toString();
+
+    // ✅ DIRECT REFERRAL ADDRESS
+    const referralAddress = userDetail.referrer;
+
+    const formData = new FormData();
+    formData.append("action", "check_withdraw_stake");
+    formData.append("userid", userId);
+
+    const res = await fetch(
+      "https://nirmalx.io/old/user/user_action.php",
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+
+    const data = await res.json();
+
+    if (data) {
+
+      setWithdrawCheck({
+        success: data.success,
+        amount: data.amount
+      });
+
+      if (data.success === false) {
+
+        const halfAmount = data.amount / 2;
+
+        toast.info("Please stake first to continue");
+
+        navigate("/staking", {
+          state: {
+            amount: halfAmount,
+            wd_id: data.wd_id,
+            referrarAddress: referralAddress   // ✅ correct value
+          }
+        });
+
+      }
+    }
+
+  } catch (error) {
+    console.error("Withdraw check error:", error);
+  }
+};
 
   return (
     <>
@@ -469,7 +591,7 @@ function Dashboard() {
                   <input
                     className="baseInput referral-link refWidth"
                     readOnly
-                    value={`https://nirmalx.io/nirmalX_react_demo/register?ref=${myId}`}
+                    value={`https://nirmalx.io/register?ref=${myId}`}
                     style={{
                       color: "#000",
                       backgroundColor: "#fff",
@@ -482,7 +604,7 @@ function Dashboard() {
                     className="base_btn copy_ref"
                     onClick={() => {
                       navigator.clipboard.writeText(
-                        `https://nirmalx.io/nirmalX_react_demo/register?ref=${myId}`
+                        `https://nirmalx.io/register?ref=${myId}`
                       );
                       toast.success("Copied!");
                     }}

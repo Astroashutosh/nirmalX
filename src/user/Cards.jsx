@@ -11,7 +11,7 @@ import {
   getUSDTContract
 } from "../utils/contract";
 
-function Cards({totalWithdraw }) {
+function Cards({ totalWithdraw }) {
 
   const { address, contracts } = useSelector((state) => state.wallet);
 
@@ -21,7 +21,7 @@ function Cards({totalWithdraw }) {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    if(address){
+    if (address) {
       loadData();
     }
   }, [address]);
@@ -40,14 +40,14 @@ function Cards({totalWithdraw }) {
         ethers.parseUnits("1", 18)
       );
 
-      const nrx_value = Number(ethers.formatUnits(price,18));
+      const nrx_value = Number(ethers.formatUnits(price, 18));
       setNrxPrice(nrx_value);
 
       setUserData({
-        currentStake: Number(ethers.formatUnits(user.totalCurrentStaked,18)),
-        totalROI: Number(ethers.formatUnits(user.totalROI,18)),
-        totalCapitalReturn: Number(ethers.formatUnits(userDetails.totalCapitalReturn,18)),
-        withdrawable: Number(ethers.formatUnits(user.balance,18)),
+        currentStake: Number(ethers.formatUnits(user.totalCurrentStaked, 18)),
+        totalROI: Number(ethers.formatUnits(user.totalROI, 18)),
+        totalCapitalReturn: Number(ethers.formatUnits(userDetails.totalCapitalReturn, 18)),
+        withdrawable: Number(ethers.formatUnits(user.balance, 18)),
       });
 
     } catch (err) {
@@ -61,7 +61,7 @@ function Cards({totalWithdraw }) {
   const handleStake = async () => {
     try {
 
-      if(!stakeAmount){
+      if (!stakeAmount) {
         toast.error("Please enter amount.");
         return;
       }
@@ -69,13 +69,14 @@ function Cards({totalWithdraw }) {
       const main = await getMainContract(contracts.MAIN_CONTRACT);
       const usdt = await getUSDTContract(contracts.USDT_CONTRACT);
 
+
       const min = Number(
         ethers.formatUnits(
-          await main.minimumInvestment(),18
+          await main.minimumInvestment(), 18
         )
       );
 
-      if(stakeAmount < min){
+      if (stakeAmount < min) {
         toast.error(`Minimum stake amount should be $ ${min}.`);
         return;
       }
@@ -84,16 +85,16 @@ function Cards({totalWithdraw }) {
         `You are staking $ ${stakeAmount}. Press Ok to continue!`
       );
 
-      if(!confirmBox) return;
+      if (!confirmBox) return;
 
-      const amount = ethers.parseUnits(stakeAmount,18);
-
+      const amount = ethers.parseUnits(stakeAmount, 18);
+      // alert(amount);
       await (await usdt.approve(
         contracts.MAIN_CONTRACT,
         amount
       )).wait();
 
-      await (await main.stakeTokens(amount,1)).wait();
+      await (await main.stakeTokens(amount, 1)).wait();
 
       toast.success(`Successfully staked $ ${stakeAmount}`);
 
@@ -108,458 +109,613 @@ function Cards({totalWithdraw }) {
 
 
 
-// const handleStake = async () => {
-//   try {
 
-//     /* ===== WALLET CHECK ===== */
-//     if (!address) {
-//       toast.error("dApp wallet not connected.");
-//       return;
-//     }
 
-//     const main = await getMainContract(contracts.MAIN_CONTRACT);
-//     const usdt = await getUSDTContract(contracts.USDT_CONTRACT);
+  // const handleStake = async () => {
+  //   try {
 
-//     /* ===== MINIMUM CHECK ===== */
-//     const min = Number(
-//       ethers.formatUnits(
-//         await main.minimumInvestment(),
-//         18
-//       )
-//     );
+  //     /* ===== WALLET CHECK ===== */
+  //     if (!address) {
+  //       toast.error("dApp wallet not connected.");
+  //       return;
+  //     }
 
-//     if (!stakeAmount || Number(stakeAmount) < min) {
-//       toast.error(`Minimum stake amount should be $ ${min}.`);
-//       return;
-//     }
+  //     const main = await getMainContract(contracts.MAIN_CONTRACT);
+  //     const usdt = await getUSDTContract(contracts.USDT_CONTRACT);
 
-//     /* ===== USER EXISTS CHECK ===== */
-//     const isUser = await main.isUserExists(address);
+  //     /* ===== MINIMUM CHECK ===== */
+  //     const min = Number(
+  //       ethers.formatUnits(
+  //         await main.minimumInvestment(),
+  //         18
+  //       )
+  //     );
 
-//     if (!isUser) {
-//       toast.error("Account is not registered.");
-//       return;
-//     }
+  //     if (!stakeAmount || Number(stakeAmount) < min) {
+  //       toast.error(`Minimum stake amount should be $ ${min}.`);
+  //       return;
+  //     }
 
-//     /* ===== CONFIRM POPUP ===== */
-//     const confirmBox = window.confirm(
-//       `You are staking $ ${stakeAmount}. Press Ok to continue!`
-//     );
+  //     /* ===== USER EXISTS CHECK ===== */
+  //     const isUser = await main.isUserExists(address);
 
-//     if (!confirmBox) return;
+  //     if (!isUser) {
+  //       toast.error("Account is not registered.");
+  //       return;
+  //     }
 
-//     /* ===== SHOW LOADER ===== */
-//     document.getElementById("cover")?.style.setProperty("display", "block");
+  //     /* ===== CONFIRM POPUP ===== */
+  //     const confirmBox = window.confirm(
+  //       `You are staking $ ${stakeAmount}. Press Ok to continue!`
+  //     );
 
-//     const amount = ethers.parseUnits(stakeAmount, 18);
+  //     if (!confirmBox) return;
 
-//     /* ===== CUSTOM GAS ===== */
-//     const signer = await getSigner();
-//     const feeData = await signer.provider.getFeeData();
+  //     /* ===== SHOW LOADER ===== */
+  //     document.getElementById("cover")?.style.setProperty("display", "block");
 
-//     /* ===== APPROVE ===== */
-//     const approveTx = await usdt.approve(
-//       contracts.MAIN_CONTRACT,
-//       amount,
-//       { gasPrice: feeData.gasPrice }
-//     );
+  //     const amount = ethers.parseUnits(stakeAmount, 18);
 
-//     await approveTx.wait();
+  //     /* ===== CUSTOM GAS ===== */
+  //     const signer = await getSigner();
+  //     const feeData = await signer.provider.getFeeData();
 
-//     /* ===== STAKE ===== */
-//     const stakeTx = await main.stakeTokens(
-//       amount,
-//       1,
-//       { gasPrice: feeData.gasPrice }
-//     );
+  //     /* ===== APPROVE ===== */
+  //     const approveTx = await usdt.approve(
+  //       contracts.MAIN_CONTRACT,
+  //       amount,
+  //       { gasPrice: feeData.gasPrice }
+  //     );
 
-//     await stakeTx.wait();
+  //     await approveTx.wait();
 
-//     /* ===== SUCCESS ===== */
-//     toast.success(`Successfully staked $ ${stakeAmount}`);
+  //     /* ===== STAKE ===== */
+  //     const stakeTx = await main.stakeTokens(
+  //       amount,
+  //       1,
+  //       { gasPrice: feeData.gasPrice }
+  //     );
 
-//     setTimeout(() => {
-//       window.location.reload(true);
-//     }, 2000);
+  //     await stakeTx.wait();
 
-//   } catch (err) {
+  //     /* ===== SUCCESS ===== */
+  //     toast.success(`Successfully staked $ ${stakeAmount}`);
 
-//     console.log(err);
+  //     setTimeout(() => {
+  //       window.location.reload(true);
+  //     }, 2000);
 
-//     if (err.code === 4001) {
-//       toast.error("Transaction failed or was rejected.");
-//     } else {
-//       toast.error("Something went wrong from the blockchain end.");
-//     }
+  //   } catch (err) {
 
-//   } finally {
-//     /* ===== HIDE LOADER ===== */
-//     document.getElementById("cover")?.style.setProperty("display", "none");
-//   }
-// };
+  //     console.log(err);
+
+  //     if (err.code === 4001) {
+  //       toast.error("Transaction failed or was rejected.");
+  //     } else {
+  //       toast.error("Something went wrong from the blockchain end.");
+  //     }
+
+  //   } finally {
+  //     /* ===== HIDE LOADER ===== */
+  //     document.getElementById("cover")?.style.setProperty("display", "none");
+  //   }
+  // };
 
 
 
   /* ================= ROI (Same PHP calculateStakingBalance) ================= */
 
-//   const handleROI = async () => {
-//     try {
+  //   const handleROI = async () => {
+  //     try {
 
-//       const confirmBox = window.confirm(
-//         "Are you sure wants to execute ?  Press Ok to continue!"
-//       );
+  //       const confirmBox = window.confirm(
+  //         "Are you sure wants to execute ?  Press Ok to continue!"
+  //       );
 
-//       if(!confirmBox) return;
+  //       if(!confirmBox) return;
 
-//       const main = await getMainContract(contracts.MAIN_CONTRACT);
+  //       const main = await getMainContract(contracts.MAIN_CONTRACT);
 
-//       await (await main.calculateStakingBalance(address)).wait();
+  //       await (await main.calculateStakingBalance(address)).wait();
 
-//       toast.success("Executed Successfully.");
+  //       toast.success("Executed Successfully.");
 
-//       loadData();
+  //       loadData();
 
-//     } catch (err) {
-//       console.log(err);
-//       toast.error("Error");
-//     }
-//   };
-const handleROI = async () => {
-  try {
+  //     } catch (err) {
+  //       console.log(err);
+  //       toast.error("Error");
+  //     }
+  //   };
+  const handleROI = async () => {
+    try {
 
-    if (!address) {
-      toast.error("No dApp wallet connected");
-      return;
-    }
-
-    const main = await getMainContract(contracts.MAIN_CONTRACT);
-
-    const isUser = await main.isUserExists(address);
-
-    if (!isUser) {
-      toast.error("Account is not registered.");
-      return;
-    }
-
-    const confirmBox = window.confirm(
-      "Are you sure wants to execute ?  Press Ok to continue!"
-    );
-
-    if (!confirmBox) return;
-
-    document.getElementById("cover")?.style.setProperty("display", "block");
-
-    const tx = await main.calculateStakingBalance(address);
-    await tx.wait();
-
-    toast.success("Executed Successfully.");
-
-    setTimeout(() => {
-      window.location.reload(true);
-    }, 2000);
-
-  } catch (err) {
-    console.log(err);
-    toast.error("Something went wrong from blockchain end.");
-  } finally {
-    document.getElementById("cover")?.style.setProperty("display", "none");
-  }
-};
-  /* ================= WITHDRAW ================= */
-const handleWithdraw = async () => {
-  try {
-
-    /* ===== INVALID AMOUNT CHECK ===== */
-    const amountValue = parseFloat(withdrawAmount);
-
-    if (!amountValue || amountValue <= 0) {
-      toast.error("Invalid amount.");
-      return;
-    }
-
-    /* ===== WALLET CHECK ===== */
-    if (!address) {
-      toast.error("No dApp wallet connected.");
-      return;
-    }
-
-    const main = await getMainContract(contracts.MAIN_CONTRACT);
-
-    /* ===== USER EXISTS CHECK ===== */
-    const isUser = await main.isUserExists(address);
-
-    if (!isUser) {
-      toast.error("Account not registered.");
-      return;
-    }
-
-    const userDetail = await main.users(address);
-    const userBalance = Number(
-      ethers.formatUnits(userDetail.balance, 18)
-    );
-
-    /* ===== BALANCE CHECK ===== */
-    if (amountValue > userBalance) {
-      toast.error("Insufficient balance.");
-      return;
-    }
-
-    /* ===== DAILY LIMIT CHECK (API) ===== */
-    const checkResponse = await fetch(
-      "https://nirmalx.io/user/user_action.php",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          action: "check_withdraw",
-          userid: userDetail.id,
-          amount: amountValue
-        })
+      if (!address) {
+        toast.error("No dApp wallet connected");
+        return;
       }
-    );
 
-    const checkData = await checkResponse.json();
+      const main = await getMainContract(contracts.MAIN_CONTRACT);
 
-    if (!checkData.success) {
-      toast.error(checkData.msg);
-      return;
-    }
+      const isUser = await main.isUserExists(address);
 
-    /* ===== CONFIRM POPUP ===== */
-    if (!window.confirm(
-      `Are you sure want to withdraw ${amountValue} USDT?  Press Ok to continue!`
-    )) return;
-
-    /* ===== SHOW LOADER ===== */
-    document.getElementById("cover")?.style.setProperty("display", "block");
-
-    const withdrawAmountWei = ethers.parseUnits(
-      amountValue.toString(),
-      18
-    );
-
-    /* ===== CUSTOM GAS ===== */
-    const signer = await getSigner();
-    const feeData = await signer.provider.getFeeData();
-
-    /* ===== WITHDRAW TX ===== */
-    const tx = await main.withdraw(
-      withdrawAmountWei,
-      0,
-      { gasPrice: feeData.gasPrice }
-    );
-
-    const receipt = await tx.wait();
-
-    if (!receipt.status) throw "Transaction failed";
-
-    /* ===== STORE WITHDRAW (API) ===== */
-    const storeResponse = await fetch(
-      "https://nirmalx.io/user/user_action.php",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          action: "store_withdraw",
-          userid: userDetail.id,
-          amount: amountValue,
-          txHash: receipt.hash,
-          wallet: address
-        })
+      if (!isUser) {
+        toast.error("Account is not registered.");
+        return;
       }
-    );
 
-    const storeData = await storeResponse.json();
+      const confirmBox = window.confirm(
+        "Are you sure wants to execute ?  Press Ok to continue!"
+      );
 
-    if (storeData.success) {
-      toast.success("Withdrawal successful");
+      if (!confirmBox) return;
+
+      document.getElementById("cover")?.style.setProperty("display", "block");
+
+      const tx = await main.calculateStakingBalance(address);
+      await tx.wait();
+
+      toast.success("Executed Successfully.");
 
       setTimeout(() => {
-        window.location.href = "/";
+        window.location.reload(true);
       }, 2000);
-    } else {
-      toast.error(storeData.msg);
+
+    } catch (err) {
+      console.log(err);
+      toast.error("Something went wrong from blockchain end.");
+    } finally {
+      document.getElementById("cover")?.style.setProperty("display", "none");
     }
+  };
+  /* ================= WITHDRAW ================= */
+  // const handleWithdraw = async () => {
+  //   try {
 
-  } catch (error) {
+  //     /* ===== INVALID AMOUNT CHECK ===== */
+  //     const amountValue = parseFloat(withdrawAmount);
 
-    console.log(error);
-    toast.error(error.toString());
+  //     if (!amountValue || amountValue <= 0) {
+  //       toast.error("Invalid amount.");
+  //       return;
+  //     }
 
-  } finally {
+  //     /* ===== WALLET CHECK ===== */
+  //     if (!address) {
+  //       toast.error("No dApp wallet connected.");
+  //       return;
+  //     }
 
-    document.getElementById("cover")?.style.setProperty("display", "none");
-  }
-};
+  //     const main = await getMainContract(contracts.MAIN_CONTRACT);
+
+  //     /* ===== USER EXISTS CHECK ===== */
+  //     const isUser = await main.isUserExists(address);
+
+  //     if (!isUser) {
+  //       toast.error("Account not registered.");
+  //       return;
+  //     }
+
+  //     const userDetail = await main.users(address);
+  //     const userBalance = Number(
+  //       ethers.formatUnits(userDetail.balance, 18)
+  //     );
+
+  //     /* ===== BALANCE CHECK ===== */
+  //     if (amountValue > userBalance) {
+  //       toast.error("Insufficient balance.");
+  //       return;
+  //     }
+
+  //     /* ===== DAILY LIMIT CHECK (API) ===== */
+  //     const checkResponse = await fetch(
+  //       "https://nirmalx.io/old/user/user_action.php",
+  //       {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  //         body: new URLSearchParams({
+  //           action: "check_withdraw",
+  //           userid: userDetail.id,
+  //           amount: amountValue
+  //         })
+  //       }
+  //     );
+
+  //     const checkData = await checkResponse.json();
+
+  //     if (!checkData.success) {
+  //       toast.error(checkData.msg);
+  //       return;
+  //     }
+
+  //     /* ===== CONFIRM POPUP ===== */
+  //     if (!window.confirm(
+  //       `Are you sure want to withdraw ${amountValue} USDT?  Press Ok to continue!`
+  //     )) return;
+
+  //     /* ===== SHOW LOADER ===== */
+  //     document.getElementById("cover")?.style.setProperty("display", "block");
+
+  //     // const withdrawAmountWei = ethers.parseUnits(
+  //     //   amountValue.toString(),
+  //     //   18
+  //     // );
+  //     const withdrawAmountWei = ethers.parseUnits(
+  //       amountValue.toString(),
+  //       18
+  //     );
+
+  //     const userBalanceWei = await main.getUserBalance(address);
+
+  //     if (withdrawAmountWei > userBalanceWei) {
+  //       toast.error("Insufficient contract balance.");
+  //       return;
+  //     }
+  //     /* ===== CUSTOM GAS ===== */
+  //     // const signer = await getSigner();
+  //     // const feeData = await signer.provider.getFeeData();
+
+  //     /* ===== WITHDRAW TX ===== */
+  //     // const tx = await main.withdraw(
+  //     //   withdrawAmountWei,
+  //     //   0,
+  //     //   { gasPrice: feeData.gasPrice }
+  //     // );
+  //     const tx = await main.withdraw(
+  //       withdrawAmountWei,
+  //       0
+  //     );
+  //     const receipt = await tx.wait();
+
+  //     if (!receipt.status) throw "Transaction failed";
+
+  //     /* ===== STORE WITHDRAW (API) ===== */
+  //     const storeResponse = await fetch(
+  //       "https://nirmalx.io/old/user/user_action.php",
+  //       {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  //         body: new URLSearchParams({
+  //           action: "store_withdraw",
+  //           userid: userDetail.id,
+  //           amount: amountValue,
+  //           txHash: receipt.hash,
+  //           wallet: address
+  //         })
+  //       }
+  //     );
+
+  //     const storeData = await storeResponse.json();
+
+  //     if (storeData.success) {
+  //       toast.success("Withdrawal successful");
+
+  //       setTimeout(() => {
+  //         window.location.href = "/";
+  //       }, 2000);
+  //     } else {
+  //       toast.error(storeData.msg);
+  //     }
+
+  //   } catch (error) {
+
+  //     console.log(error);
+  //     toast.error(error.toString());
+
+  //   } finally {
+
+  //     document.getElementById("cover")?.style.setProperty("display", "none");
+  //   }
+  // };
+
+
+  const handleWithdraw = async () => {
+    try {
+
+      const amountValue = Number(withdrawAmount);
+
+      if (!amountValue || amountValue <= 0) {
+        toast.error("Invalid amount.");
+        return;
+      }
+
+      if (amountValue < 25) {
+        toast.error("Minimum withdraw amount is $25.");
+        return;
+      }
+
+
+      if (!address) {
+        toast.error("No dApp wallet connected.");
+        return;
+      }
+
+      const main = await getMainContract(contracts.MAIN_CONTRACT);
+
+      /* ===== USER EXISTS ===== */
+
+      const isUser = await main.isUserExists(address);
+
+      if (!isUser) {
+        toast.error("Account not registered.");
+        return;
+      }
+
+      /* ===== USER DETAILS ===== */
+
+      const userDetail = await main.users(address);
+
+      const userBalance = Number(
+        ethers.formatUnits(userDetail.balance, 18)
+      );
+
+      if (amountValue > userBalance) {
+        toast.error("Insufficient balance.");
+        return;
+      }
+
+      /* ===== DAILY LIMIT CHECK (API) ===== */
+
+      const checkResponse = await fetch(
+        "https://nirmalx.io/old/user/user_action.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            action: "check_withdraw",
+            userid: userDetail.id,
+            amount: amountValue
+          })
+        }
+      );
+
+      const checkData = await checkResponse.json();
+
+      if (!checkData.success) {
+        toast.error(checkData.msg);
+        return;
+      }
+
+      /* ===== CONFIRM ===== */
+
+      if (!window.confirm(
+        `Are you sure want to withdraw ${amountValue} USDT? Press Ok to continue!`
+      )) return;
+
+      document.getElementById("cover")?.style.setProperty("display", "block");
+
+      /* ===== AMOUNT CONVERT (Same as BigNumber * 1e18) ===== */
+
+      const withdrawAmountWei = ethers.parseUnits(
+        amountValue.toString(),
+        18
+      );
+
+      /* ===== WITHDRAW ===== */
+
+      const tx = await main.withdraw(
+        withdrawAmountWei,
+        0
+      );
+
+      const receipt = await tx.wait();
+
+      if (!receipt.status) throw new Error("Transaction failed");
+
+      /* ===== STORE WITHDRAW ===== */
+
+      const storeResponse = await fetch(
+        "https://nirmalx.io/old/user/user_action.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            action: "store_withdraw",
+            userid: userDetail.id,
+            amount: amountValue,
+            txHash: receipt.hash,
+            wallet: address
+          })
+        }
+      );
+
+      const storeData = await storeResponse.json();
+
+      if (storeData.success) {
+
+        toast.success("Withdrawal successful");
+
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 2000);
+
+      } else {
+
+        toast.error(storeData.msg);
+
+      }
+
+    } catch (error) {
+
+      console.log(error);
+      toast.error(error.reason || error.message || "Withdraw failed");
+
+    } finally {
+
+      document.getElementById("cover")?.style.setProperty("display", "none");
+
+    }
+  };
+
   return (
-   <>
-     <div className="row" style={{ marginTop: "45px" }}>
+    <>
+      <div className="row" style={{ marginTop: "45px" }}>
 
-      {/* ================= STAKE ================= */}
-      <div className="col-lg-4 col-md-4">
-        <div className="farms-single-section gradient-border stakeBg">
-          <div className="coin-desc">
-            <div className="coin-desc-left">
-              <img src={logo} alt="NirmalX"/>
+        {/* ================= STAKE ================= */}
+        <div className="col-lg-4 col-md-4">
+          <div className="farms-single-section gradient-border stakeBg">
+            <div className="coin-desc">
+              <div className="coin-desc-left">
+                <img src={logo} alt="NirmalX" />
+              </div>
+              <div className="coin-desc-right newFont">
+                <h4><b>Stake Now</b></h4>
+                <ul>
+                  <li className="bg history0 nonSelect" style={{ float: "right" }}>
+                    <Link to="/stakingHistory" style={{ color: "#ffffff" }}>View History</Link>
+                  </li>
+                </ul>
+              </div>
             </div>
-            <div className="coin-desc-right newFont">
-              <h4><b>Stake Now</b></h4>
-              <ul>
-                <li className="bg history0 nonSelect" style={{float:"right"}}>
-                  <Link to="/stakingHistory" style={{color:"#ffffff"}}>View History</Link>
-                </li>
-              </ul>
+
+            <div className="calculat">
+              <div className="calculat-left">
+                <h6>Minimum :</h6>
+                <h6>Maximum :</h6>
+                <h6>Current Stake :</h6>
+              </div>
+              <div className="calculat-right">
+                <h6>$ 10</h6>
+                <h6>Unlimted</h6>
+                <h6 className="currentStake">
+                  {userData
+                    ? `$ ${userData.currentStake.toFixed(4)} ( NRX ${(userData.currentStake / nrxPrice).toFixed(4)} )`
+                    : "Loading.."}
+                </h6>
+              </div>
             </div>
-          </div>
 
-          <div className="calculat">
-            <div className="calculat-left">
-              <h6>Minimum :</h6>
-              <h6>Maximum :</h6>
-              <h6>Current Stake :</h6>
+            <label style={{ marginTop: "0.5rem" }}>Select Package*</label>
+            <select className="form-control">
+              <option value="1">Staking Package</option>
+            </select>
+
+            <label style={{ marginTop: "0.5rem" }}>Amount*</label>
+            <input
+              type="text"
+              placeholder="Enter amount"
+              className="form-control"
+              value={stakeAmount}
+              onChange={(e) => setStakeAmount(e.target.value)}
+            />
+
+            <div className="unlocks">
+              <a className="connect_btn unlockWallet" onClick={handleStake}>
+                Submit
+              </a>
             </div>
-            <div className="calculat-right">
-              <h6>$ 10</h6>
-              <h6>Unlimted</h6>
-              <h6 className="currentStake">
-                {userData
-                  ? `$ ${userData.currentStake.toFixed(4)} ( NRX ${(userData.currentStake/nrxPrice).toFixed(4)} )`
-                  : "Loading.."}
-              </h6>
-            </div>
-          </div>
-
-          <label style={{ marginTop: "0.5rem" }}>Select Package*</label>
-          <select className="form-control">
-            <option value="1">Staking Package</option>
-          </select>
-
-          <label style={{ marginTop: "0.5rem" }}>Amount*</label>
-          <input
-            type="text"
-            placeholder="Enter amount"
-            className="form-control"
-            value={stakeAmount}
-            onChange={(e)=>setStakeAmount(e.target.value)}
-          />
-
-          <div className="unlocks">
-            <a className="connect_btn unlockWallet" onClick={handleStake}>
-              Submit
-            </a>
           </div>
         </div>
+
+        {/* ================= ROI ================= */}
+
+
+
+
+        <div className="col-lg-4 col-md-4">
+          <div className="farms-single-section gradient-border stakeBg" >
+            <div className="coin-desc">
+              <div className="coin-desc-left">
+                <img src={logo} alt="NirmalX" />
+              </div>
+              <div className="coin-desc-right newFont">
+                <h4><b id="duration0">ROI</b></h4>
+                <ul>
+                  <li className="bg history0 nonSelect" style={{ float: "right" }}><Link to="/miningHistory" style={{ color: "#ffffff" }}>View History</Link></li>
+                </ul>
+              </div>
+            </div>
+            <div className="calculat">
+              <div className="calculat-left">
+                <h6>Total ROI :</h6>
+                <h6>Total Capital Return :</h6>
+              </div>
+              <div className="calculat-right">
+                <h6 className="totalROI"> {userData
+                  ? `$ ${userData.totalROI.toFixed(4)} ( NRX ${(userData.totalROI / nrxPrice).toFixed(4)} )`
+                  : "Loading.."}</h6>
+                <h6 className="totalCapitalReturn">  {userData
+                  ? `$ ${userData.totalCapitalReturn.toFixed(4)} ( NRX ${(userData.totalCapitalReturn / nrxPrice).toFixed(4)} )`
+                  : "Loading.."}</h6>
+              </div>
+
+
+            </div>
+
+            <div className="form-control stakeAmount" style={{ background: "none", border: "none" }}></div>
+
+            <div className="unlocks " style={{ marginTop: "9.9rem" }} id="mine_now">
+              <a className='connect_btn unlockWallet' id="calculate_roi_btn" onClick={handleROI} style={{ textAalign: "center" }}>Calculate ROI</a>
+            </div>
+          </div>
+        </div>
+        <div className="col-lg-4 col-md-4">
+          <div className="farms-single-section gradient-border stakeBg" >
+            <div className="coin-desc">
+              <div className="coin-desc-left">
+                <img src={logo} alt="NirmalX" />
+              </div>
+              <div className="coin-desc-right newFont">
+                <h4><b id="duration0">Withdraw</b></h4>
+                <ul>
+                  <li className="bg history0 nonSelect" style={{ float: "right" }}><Link to="/withdrawHistory" style={{ color: "#ffffff" }}>View History</Link></li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="calculat">
+              <div className="calculat-left">
+
+                <h6>Withdrawable Amount:</h6>
+                <h6>Total Withdraw :</h6>
+
+              </div>
+              <div className="calculat-right">
+
+                <h6 className="withdrawable_amount"> {userData
+                  ? `$ ${userData.withdrawable.toFixed(4)} ( NRX ${(userData.withdrawable / nrxPrice).toFixed(4)} )`
+                  : "Loading.."}</h6>
+                <h6 className="total_withdraw">
+                  {userData
+                    ? `$ ${totalWithdraw.usd} ( NRX ${totalWithdraw.nrx} )`
+                    : "Loading.."}
+                </h6>
+              </div>
+            </div>
+
+            <label for="amount" style={{ marginTop: "7rem" }}>Amount*</label>
+            <input
+              type="text"
+              placeholder="Enter amount"
+              className="form-control"
+              value={withdrawAmount}
+              onChange={(e) => setWithdrawAmount(e.target.value)}
+            />
+            <h6 id="total_bbt" className="text mt-3"></h6>
+
+            <div className="unlocks " >
+              <a className='connect_btn unlockWallet' id="withdraw_btn" onClick={handleWithdraw} style={{ textAlign: "center" }}> Withdraw </a>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       </div>
-
-      {/* ================= ROI ================= */}
- 
-
-
-
-  <div className="col-lg-4 col-md-4">
-                    <div className="farms-single-section gradient-border stakeBg" >
-                        <div className="coin-desc">
-                            <div className="coin-desc-left">
-                                <img src={logo} alt="NirmalX"/>
-                            </div>
-                            <div className="coin-desc-right newFont">
-                                <h4><b id="duration0">ROI</b></h4>
-                                <ul>
-                                    <li className="bg history0 nonSelect" style={{float: "right"}}><Link to="/miningHistory" style={{color:"#ffffff"}}>View History</Link></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div className="calculat">
-                         <div className="calculat-left">
-                            <h6>Total ROI :</h6>
-                            <h6>Total Capital Return :</h6>
-                         </div>
-                         <div className="calculat-right">
-                            <h6 className="totalROI"> {userData
-                  ? `$ ${userData.totalROI.toFixed(4)} ( NRX ${(userData.totalROI/nrxPrice).toFixed(4)} )`
-                  : "Loading.."}</h6>
-                            <h6 className="totalCapitalReturn">  {userData
-                  ? `$ ${userData.totalCapitalReturn.toFixed(4)} ( NRX ${(userData.totalCapitalReturn/nrxPrice).toFixed(4)} )`
-                  : "Loading.."}</h6>
-                         </div>  
-                         
-                         
-                        </div>
-                       
-                        <div className="form-control stakeAmount" style={{ background: "none", border: "none" }}></div>
-                      
-                        <div className="unlocks "  style={{ marginTop: "9.9rem" }} id="mine_now">
-                            <a className='connect_btn unlockWallet' id="calculate_roi_btn" onClick={handleROI} style={{textAalign: "center"}}>Calculate ROI</a>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-lg-4 col-md-4">
-                    <div className="farms-single-section gradient-border stakeBg" >
-                        <div className="coin-desc">
-                            <div className="coin-desc-left">
-                                <img src={logo} alt="NirmalX"/>
-                            </div>
-                            <div className="coin-desc-right newFont">
-                                <h4><b id="duration0">Withdraw</b></h4>
-                                <ul>
-                                    <li className="bg history0 nonSelect" style={{float: "right"}}><Link to="/withdrawHistory" style={{color:"#ffffff"}}>View History</Link></li>
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        <div className="calculat">
-                         <div className="calculat-left">
-                            
-                            <h6>Withdrawable Amount:</h6>
-                            <h6>Total Withdraw :</h6>
-
-                         </div>
-                         <div className="calculat-right">
-                            
-                            <h6 className="withdrawable_amount"> {userData
-                  ? `$ ${userData.withdrawable.toFixed(4)} ( NRX ${(userData.withdrawable/nrxPrice).toFixed(4)} )`
-                  : "Loading.."}</h6>
-                      <h6 className="total_withdraw">
-  {userData
-    ? `$ ${totalWithdraw.usd} ( NRX ${totalWithdraw.nrx} )`
-    : "Loading.."}
-</h6>
-                         </div>
-                        </div>
-                     
-                        <label for="amount" style={{marginTop:"7rem"}}>Amount*</label>
-                        <input
-            type="text"
-            placeholder="Enter amount"
-            className="form-control"
-            value={withdrawAmount}
-            onChange={(e)=>setWithdrawAmount(e.target.value)}
-          />
-                        <h6 id="total_bbt" className="text mt-3"></h6>
-                       
-                        <div className="unlocks " >
-                            <a className='connect_btn unlockWallet' id="withdraw_btn" onClick={handleWithdraw}  style={{ textAlign: "center" }}> Withdraw </a>
-                        </div>
-                    </div>
-                </div>
-              
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-     </div>
-   </>
+    </>
   )
 }
 
