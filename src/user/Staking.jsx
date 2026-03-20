@@ -23,12 +23,13 @@ function Staking() {
     const [nrxPrice, setNrxPrice] = useState(1);
     const [userData, setUserData] = useState(null);
     const [wdId, setWdId] = useState(null);
+    const [loading, setLoading] = useState(false);
     // useEffect(() => {
     //   if (location.state?.amount) {
     //     setStakeAmount(location.state.amount);
     //   }
     // }, [location.state]);
-            // console.log("referrla Address isfgdf :",location.state.referrarAddress);
+    // console.log("referrla Address isfgdf :",location.state.referrarAddress);
 
 
     useEffect(() => {
@@ -124,9 +125,9 @@ function Staking() {
 
     //         await (await main.stakeTokens(amount, 1)).wait();
 
-            // await updateWithdrawStatus();
-            // toast.success(`Successfully staked $ ${stakeAmount}`);
-            // navigate('/dashboard');
+    // await updateWithdrawStatus();
+    // toast.success(`Successfully staked $ ${stakeAmount}`);
+    // navigate('/dashboard');
 
     //         setStakeAmount("");
     //         loadData();
@@ -139,116 +140,111 @@ function Staking() {
 
 
 
-      const handleLiquidityStake = async () => {
-        try {
+    //       const handleLiquidityStake = async () => {
+    //         try {
 
-          if (!stakeAmount) {
-            toast.error("Please enter amount.");
-            return;
-          }
-
-          const liquidity = await getLiquidityContract(contracts.LIQUIDITY_CONTRACT);
-          const nrx = await getNRXContract(contracts.TOKEN_CONTRACT);
-          const usdt = await getUSDTContract(contracts.USDT_CONTRACT);
-
-
-          const min = Number(
-            ethers.formatUnits(
-              await liquidity.minimumInvestment(), 18
-            )
-          );
-
-          if (stakeAmount < min) {
-            toast.error(`Minimum stake amount should be $ ${min}.`);
-            return;
-          }
-
-          const confirmBox = window.confirm(
-            `You are staking $ ${stakeAmount}. Press Ok to continue!`
-          );
-
-          if (!confirmBox) return;
-
-        const amount = ethers.parseUnits(String(stakeAmount), 18);
-
-await (await usdt.approve(
-  contracts.LIQUIDITY_CONTRACT,
-  amount
-)).wait();
-
-await (await liquidity.stake(amount, referralAddress)).wait();
-          await updateWithdrawStatus();
-          
-          toast.success(`Successfully staked $ ${stakeAmount}`);
-
-          setStakeAmount("");
-          loadData();
-
-        } catch (err) {
-          console.log(err);
-          toast.error("Transaction failed or was rejected.");
-        }
-      };
-
-    // const handleLiquidityStake = async () => {
-    //     try {
-
-    //         if (!stakeAmount) {
+    //           if (!stakeAmount) {
     //             toast.error("Please enter amount.");
     //             return;
-    //         }
+    //           }
 
-    //         if (!contracts?.LIQUIDITY_CONTRACT) {
-    //             toast.error("Liquidity contract not found");
-    //             return;
-    //         }
+    //           const liquidity = await getLiquidityContract(contracts.LIQUIDITY_CONTRACT);
+    //           const nrx = await getNRXContract(contracts.TOKEN_CONTRACT);
+    //           const usdt = await getUSDTContract(contracts.USDT_CONTRACT);
 
-    //         const liquidity = await getLiquidityContract(
-    //             contracts.LIQUIDITY_CONTRACT
-    //         );
 
-    //         const usdt = await getUSDTContract(
-    //             contracts.USDT_CONTRACT
-    //         );
-
-    //         const min = Number(
+    //           const min = Number(
     //             ethers.formatUnits(
-    //                 await liquidity.minimumInvestment(), 18
+    //               await liquidity.minimumInvestment(), 18
     //             )
-    //         );
+    //           );
 
-    //         if (stakeAmount < min) {
+    //           if (stakeAmount < min) {
     //             toast.error(`Minimum stake amount should be $ ${min}.`);
     //             return;
-    //         }
+    //           }
 
-    //         const confirmBox = window.confirm(
+    //           const confirmBox = window.confirm(
     //             `You are staking $ ${stakeAmount}. Press Ok to continue!`
-    //         );
+    //           );
 
-    //         if (!confirmBox) return;
+    //           if (!confirmBox) return;
 
-    //         const amount = ethers.parseUnits(stakeAmount.toString(), 18);
+    //         const amount = ethers.parseUnits(String(stakeAmount), 18);
 
-    //         // ✅ FIXED
-    //         await (await usdt.approve(
-    //             contracts.LIQUIDITY_CONTRACT,
-    //             amount
-    //         )).wait();
+    // await (await usdt.approve(
+    //   contracts.LIQUIDITY_CONTRACT,
+    //   amount
+    // )).wait();
 
-    //         await (await liquidity.stake(amount, referralAddress)).wait();
+    // await (await liquidity.stake(amount, referralAddress)).wait();
+    //           await updateWithdrawStatus();
 
-    //         toast.success(`Successfully staked $ ${stakeAmount}`);
+    //           toast.success(`Successfully staked $ ${stakeAmount}`);
 
-    //         setStakeAmount("");
-    //         loadData();
+    //           setStakeAmount("");
+    //           loadData();
 
-    //     } catch (err) {
-    //         console.log(err);
-    //         toast.error("Transaction failed or was rejected.");
-    //     }
-    // };
-  
+    //         } catch (err) {
+    //           console.log(err);
+    //           toast.error("Transaction failed or was rejected.");
+    //         }
+    //       };
+
+    const handleLiquidityStake = async () => {
+        try {
+
+            setLoading(true);
+
+            if (!stakeAmount) {
+                toast.error("Please enter amount.");
+                return;
+            }
+
+            const liquidity = await getLiquidityContract(contracts.LIQUIDITY_CONTRACT);
+            const usdt = await getUSDTContract(contracts.USDT_CONTRACT);
+
+            const min = Number(
+                ethers.formatUnits(
+                    await liquidity.minimumInvestment(), 18
+                )
+            );
+
+            if (stakeAmount < min) {
+                toast.error(`Minimum stake amount should be $ ${min}.`);
+                return;
+            }
+
+            const confirmBox = window.confirm(
+                `You are staking $ ${stakeAmount}. Press Ok to continue!`
+            );
+
+            if (!confirmBox) return;
+
+            const amount = ethers.parseUnits(String(stakeAmount), 18);
+
+            await (await usdt.approve(
+                contracts.LIQUIDITY_CONTRACT,
+                amount
+            )).wait();
+
+            await (await liquidity.stake(amount, referralAddress)).wait();
+
+            await updateWithdrawStatus();
+
+            toast.success(`Successfully staked $ ${stakeAmount}`);
+
+            setStakeAmount("");
+            loadData();
+
+        } catch (err) {
+            console.log(err);
+            toast.error("Transaction failed or was rejected.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const updateWithdrawStatus = async () => {
         // console.log("withdraw id:", wdId);
 
@@ -332,9 +328,18 @@ await (await liquidity.stake(amount, referralAddress)).wait();
                         />
 
                         <div className="unlocks mt-5">
-                            <a className="connect_btn unlockWallet" onClick={handleLiquidityStake}>
+                            {/* <a className="connect_btn unlockWallet" onClick={handleLiquidityStake}>
                                 Submit
+                            </a> */}
+
+                            <a
+                                className="connect_btn unlockWallet"
+                                onClick={handleLiquidityStake}
+                                style={{ pointerEvents: loading ? "none" : "auto", opacity: loading ? 0.6 : 1 }}
+                            >
+                                {loading ? "Processing..." : "Submit"}
                             </a>
+
                         </div>
                     </div>
                 </div>

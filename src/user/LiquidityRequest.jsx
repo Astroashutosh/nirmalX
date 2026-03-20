@@ -11,7 +11,7 @@ function LiquidityRequest() {
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
-
+const [processingIndex, setProcessingIndex] = useState(null);
   const liquidityAddress =
     contracts?.LIQUIDITY_CONTRACT;
 
@@ -97,7 +97,7 @@ function LiquidityRequest() {
 
 const handleApprove = async (user, index) => {
   try {
-
+setProcessingIndex(index); 
     const liquidity = await getLiquidityContract(contracts.LIQUIDITY_CONTRACT);
     const nrx = await getNRXContract(contracts.TOKEN_CONTRACT);
 
@@ -119,6 +119,8 @@ const handleApprove = async (user, index) => {
   } catch (err) {
     console.log(err);
     toast.error("Approve failed (Only owner allowed)");
+  }finally {
+    setProcessingIndex(null);
   }
 };
 
@@ -168,13 +170,19 @@ const handleApprove = async (user, index) => {
                   </td>
 
                   <td>
-                    <button
+                    {/* <button
                       className="btn btn-success btn-sm"
                       onClick={() => handleApprove(row.user, row.index)}
                     >
                       Approve {row.index}
-                    </button>
-                    
+                    </button> */}
+                    <button
+  className="btn btn-success btn-sm"
+  onClick={() => handleApprove(row.user, row.index)}
+  disabled={processingIndex === row.index}
+>
+  {processingIndex === row.index ? "Processing..." : "Approve"}
+</button>
                   </td>
 
                 </tr>
